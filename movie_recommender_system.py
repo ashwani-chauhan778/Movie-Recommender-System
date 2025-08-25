@@ -1,18 +1,36 @@
 import streamlit as st
 import pickle
 import os
+import gdown
 
 # --- Page Config ---
 st.set_page_config(page_title="🎬 Movie Recommender", layout="wide")
 
+# --- Google Drive File IDs ---
+MOVIE_FILE_ID = "1QkHASca9UN7s0wM6606OubC5nAofGVtZ"
+SIMILARITY_FILE_ID = "1K758ZfEFyF7oQfCjFqFO6sFh8WJoz03N"
+
+# --- Local File Names ---
+MOVIE_FILE = "movie_list.pkl"
+SIMILARITY_FILE = "similarity.pkl"
+
+# --- Function to download files from Google Drive ---
+def download_file(file_id, output):
+    url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(url, output, quiet=False)
+
+# --- Ensure files exist ---
+if not os.path.exists(MOVIE_FILE):
+    st.warning("Downloading movie list file...")
+    download_file(MOVIE_FILE_ID, MOVIE_FILE)
+    st.success("Movie list downloaded!")
+
+if not os.path.exists(SIMILARITY_FILE):
+    st.warning("Downloading similarity matrix...")
+    download_file(SIMILARITY_FILE_ID, SIMILARITY_FILE)
+    st.success("Similarity matrix downloaded!")
+
 # --- Load Data ---
-MOVIE_FILE = 'movie_list.pkl'
-SIMILARITY_FILE = 'similarity.pkl'
-
-if not os.path.exists(MOVIE_FILE) or not os.path.exists(SIMILARITY_FILE):
-    st.error("Required files are missing. Please upload 'movie_list.pkl' and 'similarity.pkl'.")
-    st.stop()
-
 movies = pickle.load(open(MOVIE_FILE, 'rb'))
 similarity = pickle.load(open(SIMILARITY_FILE, 'rb'))
 
@@ -21,7 +39,7 @@ def recommend(movie):
     index = movies[movies['title'] == movie].index[0]
     distances = sorted(list(enumerate(similarity[index])), reverse=True, key=lambda x: x[1])
     recommended_movies = []
-    for i in distances[1:6]:  # Top 5 recommendations
+    for i in distances[1:6]:  # Top 5
         recommended_movies.append(movies.iloc[i[0]].title)
     return recommended_movies
 
