@@ -1,33 +1,36 @@
 import streamlit as st
 import pickle
 import os
-import gdown
+import requests
 
 # --- Page Config ---
 st.set_page_config(page_title="🎬 Movie Recommender", layout="wide")
 
-# --- Google Drive File IDs ---
-MOVIE_FILE_ID = "1QkHASca9UN7s0wM6606OubC5nAofGVtZ"
-SIMILARITY_FILE_ID = "1K758ZfEFyF7oQfCjFqFO6sFh8WJoz03N"
+# --- Google Drive Direct Download Links ---
+MOVIE_FILE_URL = "https://drive.google.com/uc?id=1QkHASca9UN7s0wM6606OubC5nAofGVtZ"
+SIMILARITY_FILE_URL = "https://drive.google.com/uc?id=1K758ZfEFyF7oQfCjFqFO6sFh8WJoz03N"
 
-# --- Local File Names ---
 MOVIE_FILE = "movie_list.pkl"
 SIMILARITY_FILE = "similarity.pkl"
 
-# --- Function to download files from Google Drive ---
-def download_file(file_id, output):
-    url = f"https://drive.google.com/uc?id={file_id}"
-    gdown.download(url, output, quiet=False)
+# --- Download function ---
+def download_file(url, filename):
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+    else:
+        st.error(f"Failed to download {filename}.")
 
 # --- Ensure files exist ---
 if not os.path.exists(MOVIE_FILE):
     st.warning("Downloading movie list file...")
-    download_file(MOVIE_FILE_ID, MOVIE_FILE)
+    download_file(MOVIE_FILE_URL, MOVIE_FILE)
     st.success("Movie list downloaded!")
 
 if not os.path.exists(SIMILARITY_FILE):
     st.warning("Downloading similarity matrix...")
-    download_file(SIMILARITY_FILE_ID, SIMILARITY_FILE)
+    download_file(SIMILARITY_FILE_URL, SIMILARITY_FILE)
     st.success("Similarity matrix downloaded!")
 
 # --- Load Data ---
@@ -39,7 +42,7 @@ def recommend(movie):
     index = movies[movies['title'] == movie].index[0]
     distances = sorted(list(enumerate(similarity[index])), reverse=True, key=lambda x: x[1])
     recommended_movies = []
-    for i in distances[1:6]:  # Top 5
+    for i in distances[1:6]:
         recommended_movies.append(movies.iloc[i[0]].title)
     return recommended_movies
 
