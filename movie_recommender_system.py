@@ -1,13 +1,35 @@
 import streamlit as st
 import pickle
+import os
+import requests
 
-# --- Page config for look & feel ---
+# URL to download similarity.pkl - replace this with your actual direct download link
+SIMILARITY_URL = "https://drive.google.com/file/d/1K758ZfEFyF7oQfCjFqFO6sFh8WJoz03N/view?usp=sharing"
+
+# Function to download the large file
+def download_file(url, filename):
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+# --- Page config ---
 st.set_page_config(page_title="🎬 Movie Recommender", layout="wide")
 
-# --- Load data ---
+# --- Load movie list ---
 movies = pickle.load(open('movie_list.pkl', 'rb'))
+
+# --- Ensure similarity.pkl is available ---
+if not os.path.exists('similarity.pkl'):
+    st.warning("Downloading similarity data, please wait...")
+    download_file(SIMILARITY_URL, 'similarity.pkl')
+    st.success("Download complete!")
+
+# Load similarity matrix
 similarity = pickle.load(open('similarity.pkl', 'rb'))
 
+# Recommendation function
 def recommend(movie):
     index = movies[movies['title'] == movie].index[0]
     distances = sorted(list(enumerate(similarity[index])), reverse=True, key=lambda x: x[1])
@@ -16,7 +38,7 @@ def recommend(movie):
         recommended_movies.append(movies.iloc[i[0]].title)
     return recommended_movies
 
-# --- Sidebar ---
+# Sidebar content
 with st.sidebar:
     st.title("🍿 About this App")
     st.write(
@@ -26,7 +48,7 @@ with st.sidebar:
     st.markdown("---")
     st.write("Select a movie to begin your cinematic journey!")
 
-# --- Main area ---
+# Main content
 st.title("🎥 Movie Recommender System")
 st.write("Find movies similar to your favorites and discover hidden gems.")
 
@@ -47,12 +69,9 @@ with col2:
         recommendations = recommend(selected_movie)
         for idx, title in enumerate(recommendations, 1):
             st.markdown(f"### {idx}. {title}")
-            # Example: st.image(poster_url, width=185)
     else:
         st.info("Choose a movie and click 'Recommend Movies' to see suggestions.")
 
-# --- Footer ---
+# Footer
 st.markdown("---")
 st.caption("Made with ❤️ - Ashwani")
-
-
