@@ -15,7 +15,7 @@ import streamlit as st
 #                 f.write(chunk)
 
 # --- Page config ---
-st.set_page_config(page_title="🎬 Movie Recommender", layout="wide")
+# st.set_page_config(page_title="🎬 Movie Recommender", layout="wide")
 
 # --- Load movie list ---
 # movies = pickle.load(open('movie_list.pkl', 'rb'))
@@ -52,7 +52,7 @@ st.set_page_config(page_title="🎬 Movie Recommender", layout="wide")
 st.title("🎥 Movie Recommender System")
 st.write("Find movies similar to your favorites and discover hidden gems.")
 
-col1, col2 = st.columns([2, 3], gap="large")
+# col1, col2 = st.columns([2, 3], gap="large")
 
 # with col1:
 #     st.header("<._.> Choose Your Movie")
@@ -73,5 +73,5 @@ col1, col2 = st.columns([2, 3], gap="large")
 #         st.info("Choose a movie and click 'Recommend Movies' to see suggestions.")
 
 # Footer
-st.markdown("---")
-st.caption("Made with ❤️ - Ashwani")
+# st.markdown("---")
+# st.caption("Made with ❤️ - Ashwani")
